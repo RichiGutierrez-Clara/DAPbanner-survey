@@ -167,11 +167,31 @@ function updateBtn() {
 function submitVote() {
   const btn = document.getElementById('vote-btn');
   const res = document.getElementById('result');
+  const feedback = document.getElementById('feedback').value;
   btn.disabled = true;
-  btn.textContent = '✓ Vote recorded';
-  res.style.display = 'block';
-  res.innerHTML = 'You voted for <strong>' + PAL[selP].label + '</strong> + <strong>Composition ' + COMP_LABEL[selC] + '</strong>. Thanks!';
-  document.querySelectorAll('.pal-btn, .comp-btn').forEach(b => { b.disabled = true; b.style.cursor = 'default'; });
+  btn.textContent = 'Sending...';
+  fetch('https://n8n-ui-prod.clara.tools/webhook/76d76ead-5493-4fe5-a6d2-46bf05d420b7', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      combination: PAL[selP].label + ' + Composition ' + COMP_LABEL[selC],
+      palette: PAL[selP].label,
+      composition: 'Composition ' + COMP_LABEL[selC],
+      feedback: feedback
+    })
+  })
+  .then(() => {
+    btn.textContent = '✓ Vote recorded';
+    res.style.display = 'block';
+    res.innerHTML = 'You voted for <strong>' + PAL[selP].label + '</strong> + <strong>Composition ' + COMP_LABEL[selC] + '</strong>. Thanks!';
+    document.querySelectorAll('.pal-btn, .comp-btn').forEach(b => { b.disabled = true; b.style.cursor = 'default'; });
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.textContent = 'Vote · ' + PAL[selP].label + ' + Composition ' + COMP_LABEL[selC];
+    res.style.display = 'block';
+    res.innerHTML = 'Something went wrong. Please try again.';
+  });
 }
 </script>
 </body>
